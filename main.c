@@ -1,15 +1,8 @@
 #include <header.h>
+#include <iptable.cpp>
 
 char * Host;
 int Hsize;
-char text[100];
-
-bool ip_table() {
-    system("iptable -F");
-    system("iptables -A OUTPUT -j NFQUEUE --queue-num 0");
-    system("iptables -A INPUT -j NFQUEUE --queue-num 0");
-    return true;
-}
 
 void dump(unsigned char* buf, int size) {
     int i;
@@ -41,35 +34,39 @@ bool netfilter(unsigned char * buf, char * Host){
     tcplen = tcp->th_off;
     buf += tcplen*4;
 
-<<<<<<< HEAD
-    int i,j=0,count=0; //gilgil.net  gilgil.net.naver.com  // gilgil.net.naver.com  gilgil.net
+    int i,j=0,count=0;
     char result;
-=======
-    int i,j=0;
->>>>>>> 0b24855b9573c95b6222bd460cf99a62f239aa4b
+    char text[Hsize+100];
 
     if (ntohs(tcp->th_dport) == 80) {  // 80 port(http) 443 port(https)
+
         for (i=0;i<ip_tlen-(ip_hlen+tcplen)*4;i++){
+
             if (i % 16 == 0)
                 printf("\n");
             printf("%02x ",buf[i]);
 
             if (buf[i]==0x48 && buf[i+1]==0x6f && buf[i+2]==0x73 && buf[i+3]==0x74) {  // Host
                 printf("\n## find HOST ##\n");
+
                 while(1) {
                     if(buf[i+6]==0x0d && buf[i+7]==0x0a){
                         break;
                     }
-                    ++count;
+                    if (j > Hsize+100) {   // Size of URL behind the "HOST: " > Size of text
+                        printf("over buf");
+                        break;
+                    }
                     text[j]=buf[i+6];
                     printf("buf = %02x\n",buf[i+6]);
+                    ++count;
                     i++;
                     j++;
                 }
             }
         }
     }
-    if (count == Hsize && memcmp(&text,Host,Hsize) == 0) {
+    if (count == Hsize && memcmp(text,Host,Hsize) == 0) {  //gilgil.net  gilgil.net.naver.com
         printf("\n차단\n");
         result = true;
     }
