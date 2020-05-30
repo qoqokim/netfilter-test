@@ -41,8 +41,8 @@ bool netfilter(unsigned char * buf, char * Host){
     tcplen = tcp->th_off;
     buf += tcplen*4;
 
-    int i,j=0;
-    //char text[100]; //gilgil.net    host : test.gilgil.net
+    int i,j=0,count=0; //gilgil.net  gilgil.net.naver.com  // gilgil.net.naver.com  gilgil.net
+    char result;
 
     if (ntohs(tcp->th_dport) == 80) {  // 80 port(http) 443 port(https)
         for (i=0;i<ip_tlen-(ip_hlen+tcplen)*4;i++){
@@ -56,6 +56,7 @@ bool netfilter(unsigned char * buf, char * Host){
                     if(buf[i+6]==0x0d && buf[i+7]==0x0a){
                         break;
                     }
+                    ++count;
                     text[j]=buf[i+6];
                     printf("buf = %02x\n",buf[i+6]);
                     i++;
@@ -64,14 +65,15 @@ bool netfilter(unsigned char * buf, char * Host){
             }
         }
     }
-    if (memcmp(&text,Host,Hsize) == 0) {
-        printf("\n성공 ");
-        return true;
+    if (count == Hsize && memcmp(&text,Host,Hsize) == 0) {
+        printf("\n차단\n");
+        result = true;
     }
     else {
-        printf("again fail...\n");
-        return false;
+        printf("\n정상적인 사이트\n");
+        result = false;
     }
+    return result;
 }
 
 
