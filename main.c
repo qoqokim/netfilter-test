@@ -42,7 +42,6 @@ bool netfilter(unsigned char * buf, char * Host){
     buf += tcplen*4;
 
     int i,j=0;
-    //char text[100]; //gilgil.net    host : test.gilgil.net
 
     if (ntohs(tcp->th_dport) == 80) {  // 80 port(http) 443 port(https)
         for (i=0;i<ip_tlen-(ip_hlen+tcplen)*4;i++){
